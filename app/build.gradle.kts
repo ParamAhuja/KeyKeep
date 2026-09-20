@@ -28,10 +28,11 @@ android {
             }
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+// removed:
+//    compileOptions {
+//        sourceCompatibility = JavaVersion.VERSION_11
+//        targetCompatibility = JavaVersion.VERSION_11
+//    }
     buildFeatures {
         compose = true
     }
@@ -63,4 +64,12 @@ dependencies {
 // SQLCipher Community Edition
     implementation("net.zetetic:sqlcipher-android:4.19.0@aar")
     implementation("androidx.sqlite:sqlite:2.7.1") // Updated from 2.7.0
+// standard biometic lib for android
+    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+//    nav
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.compose.material:material-icons-extended")
+//    lifecycle
+    implementation("androidx.lifecycle:lifecycle-process:2.7.0")
 }

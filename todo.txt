@@ -1,0 +1,29 @@
+basics:
+1. DONE - mandatory fields and warning
+2. DONE - crashes after I switch back to the app from another app and re-unlock it. but then opens fine (re-open after crash)
+3. DONE - field validations
+4. DONE - edit button
+5a. DONE - buttons get all weird and squished/vertical-text when not enough space, specially delete button.
+5b. DONE - sometimes delete button vanishes when I click "show" and space gets even less
+6. DONE - after the first setup, when opening, the unlock vault button is unnecessary, directly go to biometric
+7. DONE - notes not showing up
+8. DONE - delete confirmation
+
+# extras:
+1. logo and ui
+2. sync (remove first setup, change it to fist sync thing)
+3. add button should be directly below notes
+4. search button
+5. side menu for (theme, settings, option to disable pin and biometric, change pass)
+6. put length limit on notes
+7. mass select to delete
+8. maybe re-order / group thing with colors
+9. cancel button in addC page
+10. remove auth cancel toast
+11. add a custom pin option
+12. align the service name and username like how notes are
+
+
+
+# security:
+injection secure?
