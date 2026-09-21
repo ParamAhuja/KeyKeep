@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.KeyKeep" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.KeyKeep" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Optional: Ensure background matches dark theme -->
+        <item name="android:filterTouchesWhenObscured">true</item>
+    </style>
 </resources>

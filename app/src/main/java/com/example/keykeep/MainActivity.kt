@@ -1,6 +1,7 @@
 package com.example.keykeep
 
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -30,9 +31,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.dp
 // img:
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import androidx.compose.material3.Surface
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 // Ensure you import your app's specific R class
 import com.example.keykeep.R
+import com.example.keykeep.ui.theme.KeyKeepTheme
 
 
 class MainActivity : FragmentActivity() {
@@ -41,6 +51,13 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Block screenshots and recents menu snapshots
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+
         System.loadLibrary("sqlcipher")
         // 1. Create the observer
         val lifecycleObserver = object : DefaultLifecycleObserver {
@@ -54,85 +71,103 @@ class MainActivity : FragmentActivity() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
         setContent {
             val authState = viewModel.authState.collectAsState().value
+            val appTheme = viewModel.appTheme.collectAsState().value
 
-            when (authState) {
-                MainViewModel.AuthState.FIRST_OPEN -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Button(onClick = { showBiometricPrompt() }) {
-                            Text("Setup Secure Vault")
+            val isDarkTheme = when (appTheme) {
+                MainViewModel.AppTheme.SYSTEM -> isSystemInDarkTheme()
+                MainViewModel.AppTheme.DARK -> true
+                MainViewModel.AppTheme.LIGHT -> false
+            }
+
+            KeyKeepTheme(darkTheme = isDarkTheme) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    when (authState) {
+                    MainViewModel.AuthState.FIRST_OPEN -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Button(onClick = { showBiometricPrompt() }) {
+                                Text("Setup Secure Vault")
+                            }
                         }
                     }
-                }
-                MainViewModel.AuthState.LOCKED -> {
+                    MainViewModel.AuthState.LOCKED -> {
 
-                    // Automatically trigger the prompt when the screen appears
-                    LaunchedEffect(Unit) {
-                        showBiometricPrompt()
-                    }
-
-                    // Fallback UI in case the user taps outside and dismisses the biometric dialog
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        // Replaced the Lock Icon with your custom Image
-                        Image(
-                            painter = painterResource(id = R.drawable.app_logo), // Matches your filename
-                            contentDescription = "KeyKeep Logo",
-                            modifier = Modifier.size(120.dp) // Adjust size as necessary
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "Vault is Locked",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        Button(onClick = {
+                        // Automatically trigger the prompt when the screen appears
+                        LaunchedEffect(Unit) {
                             showBiometricPrompt()
-                        }) {
-                            Text("Unlock Vault")
+                        }
+
+                        // Fallback UI in case the user taps outside and dismisses the biometric dialog
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            // Replaced the Lock Icon with your custom Image
+                            Image(
+                                painter = painterResource(id = R.drawable.app_logo), // Matches your filename
+                                contentDescription = "KeyKeep Logo",
+                                modifier = Modifier.size(120.dp) // Adjust size as necessary
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = "Vault is Locked",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            Button(onClick = {
+                                showBiometricPrompt()
+                            }) {
+                                Text("Unlock Vault")
+                            }
                         }
                     }
-                }
-                MainViewModel.AuthState.UNLOCKED -> {
-                    // Set up the Navigation Graph
-                    val navController = rememberNavController()
+                    MainViewModel.AuthState.UNLOCKED -> {
+                        // Set up the Navigation Graph
+                        val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = "vault_list") {
-                        composable("vault_list") {
-                            VaultListScreen(
-                                viewModel = viewModel,
-                                onNavigateToAdd = { navController.navigate("add_edit_credential/-1") },
-                                onNavigateToEdit = { credentialId ->
-                                    navController.navigate("add_edit_credential/$credentialId")
-                                }
-                            )
-                        }
-
-                        // Update the route to accept an ID. -1 means "Add New"
-                        composable(
-                            route = "add_edit_credential/{credentialId}",
-                            arguments = listOf(androidx.navigation.navArgument("credentialId") {
-                                type = androidx.navigation.NavType.IntType
-                            })
-                        ) { backStackEntry ->
-                            val credentialId = backStackEntry.arguments?.getInt("credentialId") ?: -1
-                            AddCredentialScreen(
-                                viewModel = viewModel,
-                                credentialId = credentialId, // Pass the ID to the screen
-                                onNavigateBack = { navController.popBackStack() }
-                            )
+                        NavHost(
+                            navController = navController,
+                            startDestination = "vault_list",
+                            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(300)) },
+                            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(300)) },
+                            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(300)) },
+                            popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(300)) }
+                        ) {
+                            composable("vault_list") {
+                                VaultListScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToAdd = { navController.navigate("add_edit_credential/-1") },
+                                    onNavigateToEdit = { credentialId ->
+                                        navController.navigate("add_edit_credential/$credentialId")}
+                                )
+                            }
+                            composable(
+                                route = "add_edit_credential/{credentialId}",
+                                arguments = listOf(navArgument("credentialId") {
+                                    type = NavType.IntType
+                                })
+                            ) { backStackEntry ->
+                                val credentialId = backStackEntry.arguments?.getInt("credentialId") ?: -1
+                                AddCredentialScreen(
+                                    viewModel = viewModel,
+                                    credentialId = credentialId, // Pass the ID to the screen
+                                    onNavigateBack = { navController.popBackStack() }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
 
     private fun showBiometricPrompt() {
         val executor = ContextCompat.getMainExecutor(this)
@@ -145,7 +180,7 @@ class MainActivity : FragmentActivity() {
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    Toast.makeText(applicationContext, "Authentication error: $errString", Toast.LENGTH_SHORT).show()
+                    // Removed the Toast that shows authentication error
                 }
             })
 

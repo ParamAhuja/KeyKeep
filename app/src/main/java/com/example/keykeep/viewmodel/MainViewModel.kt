@@ -14,15 +14,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // Define the UI states
     enum class AuthState { LOCKED, UNLOCKED, FIRST_OPEN }
+    enum class AppTheme { SYSTEM, LIGHT, DARK }
 
     private val _authState = MutableStateFlow(AuthState.LOCKED)
     val authState: StateFlow<AuthState> = _authState
+
+    private val _appTheme = MutableStateFlow(AppTheme.SYSTEM)
+    val appTheme: StateFlow<AppTheme> = _appTheme
 
     var appDatabase: AppDatabase? = null
         private set
 
     init {
         checkFirstLaunch()
+        loadTheme()
     }
 
     private fun checkFirstLaunch() {
@@ -30,6 +35,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (!prefs.contains("encrypted_db_key")) {
             _authState.value = AuthState.FIRST_OPEN
         }
+    }
+
+    private fun loadTheme() {
+        val prefs = getApplication<Application>().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val themeName = prefs.getString("app_theme", AppTheme.SYSTEM.name) ?: AppTheme.SYSTEM.name
+        _appTheme.value = AppTheme.valueOf(themeName)
+    }
+
+    fun setTheme(theme: AppTheme) {
+        val prefs = getApplication<Application>().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("app_theme", theme.name).apply()
+        _appTheme.value = theme
     }
 
     fun handleAuthenticationSuccess() {

@@ -10,20 +10,47 @@ basics:
 8. DONE - delete confirmation
 
 # extras:
-1. logo and ui
-2. sync (remove first setup, change it to fist sync thing)
-3. add button should be directly below notes
-4. search button
-5. side menu for (theme, settings, option to disable pin and biometric, change pass)
-6. put length limit on notes
-7. mass select to delete
-8. maybe re-order / group thing with colors
-9. cancel button in addC page
-10. remove auth cancel toast
-11. add a custom pin option
-12. align the service name and username like how notes are
+1. DONE - logo and ui
+2. DONE - sync (remove first setup, change it to fist sync thing)
+3. CANCEL - add button should be directly below notes
+4. DONE - search button
+5. DONE - put length limit on notes, validation
+6. DONE: cancel button in addC page
+7. DONE: remove auth cancel toast
+8. DONE - blur on going out to recents(
+# security  added:
+- screenshot restrictions
+- lockscreen blocking
+- in-memory variable cleaning
+- Tapjacking Protection
+- Keyboard Incognito Mode
+- clipboard thing
+)
 
 
 
+final:-
+ui fixes
+sync
+option to add a custom pin and also to change pass
+disable biometric in settings
+ui things:
+maybe re-order / group thing with colors
+mass select to delete
+for all phones 
+fix align the service name and username like how notes are
+make passwords take more space
+...
+
+
+more security neeeded: Keystore Invalidation on New Biometrics is absolutely essential for the core security of a password vault. If a bad actor discovers your device PIN, unlocks your phone, and adds their own fingerprint to the Android settings, this is the only defense mechanism that actively shreds your app's decryption key to permanently lock them out of your SQLCipher database.
+
+PendingIntent Immutability is a non-negotiable technical requirement enforced by the Android OS itself. If you eventually add any background features—like system notifications or an autofill service—Android 12 and newer will outright crash your app if your intents are not explicitly flagged as immutable.
+
+# slow and whatnot
+# all devices api23+ compatibility
+# other testing
 # security:
 injection secure?
+
+
